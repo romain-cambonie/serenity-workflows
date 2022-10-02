@@ -1,0 +1,66 @@
+# Abstract
+# This workflow check if all the validation check are valid in parallel
+# A validation check is a project command that execute successfully (process exit with 0)
+
+# Current limitation : this run the 'lint', 'prettier', 'test' package.json commands.
+
+# Note: this workflow default input node-version will be updated following the node version LTS.
+
+# commands-as-string input example: 'lint,prettier:check,test:unit'
+
+name: zReusable Validation Matrix Workflow
+
+on:
+  workflow_call:
+    inputs:
+      commands-as-comma-separated-string:
+        required: true
+        type: string
+      node-version:
+        required: false
+        type: string
+        default: 'lts/*'
+      package-manager:
+        required: false
+        type: string
+        default: 'yarn'
+      package-manager-dependencies-command:
+        required: false
+        type: string
+        default: 'yarn install --frozen-lockfile'
+
+jobs:
+  get-commands:
+    uses: romain-cambonie/serenity-workflow-dev/.github/workflows/_matrix-from-string.reusable.yml@master
+    with:
+      input-string: ${{ inputs.commands-as-comma-separated-string }}
+      separator: ','
+      field: 'command'
+
+  validation:
+    name: ' '
+    runs-on: ubuntu-latest
+    needs:
+      - get-commands
+    strategy:
+      fail-fast: true
+      matrix:
+        command: ${{ fromJSON(needs.get-commands.outputs.matrix) }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ needs.dynamic-variables.outputs.node-version }}
+          cache: ${{ needs.dynamic-variables.outputs.package-manager }}
+
+      - name: Install dependencies (prefer frozen)
+        run: ${{ inputs.package-manager-dependencies-command }}
+
+      - name: ${{matrix.command}}
+        env:
+          COMMAND: ${{matrix.command}}
+        run: ${{ inputs.package-manager }} $COMMAND

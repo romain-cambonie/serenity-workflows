@@ -19,6 +19,10 @@ on:
         required: false
         type: string
         default: 'build'
+      out-dir:
+        required: false
+        type: string
+        default: 'build'
       start-command:
         required: false
         type: string
@@ -59,4 +63,4 @@ jobs:
           name: ${{inputs.artifact-name}}
           path: |
             package.json
-            dist
+            ${{inputs.out-dir}}

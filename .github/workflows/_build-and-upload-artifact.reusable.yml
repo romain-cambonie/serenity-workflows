@@ -22,7 +22,7 @@ on:
       out-dir:
         required: false
         type: string
-        default: 'build'
+        default: 'dist'
       start-command:
         required: false
         type: string

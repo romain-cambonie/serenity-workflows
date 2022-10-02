@@ -53,12 +53,6 @@ jobs:
       - name: Build
         run: ${{ inputs.package-manager }} ${{ inputs.build-command }}
 
-      - name: Minimal package.json to run build
-        run: |
-          touch filtered.json
-          cat package.json | jq '{name, scripts: {start: .scripts.${{ inputs.start-command }}}, dependencies}' > filtered.json
-          mv filtered.json package.json
-
       - name: Upload build bundle as artifact
         uses: actions/upload-artifact@v3
         with:

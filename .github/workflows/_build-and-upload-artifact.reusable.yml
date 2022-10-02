@@ -14,7 +14,7 @@ on:
       artifact-name:
         required: false
         type: string
-        default: 'build-bundle'
+        default: 'bundle'
       build-command:
         required: false
         type: string
